@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        class CreateTanchishe{
+            constructor(){
+                this.oriented = 'down';
+                this.bodyWidth = 10;
+                this.initLen = 15;
+                this.intervalId = '';
+                this.createFoodTimeoutId = '';
+                this.timeRandom = 2000;
+                this.foodNum = 5;
+                this.pzObj = {};
+                this.boxName = '#es';
+                this.boxInnerName = '#es-body';
+                this.optionName = '#option';
+                this.startBtnName = '#startBtn';
+                this.bodyBoxName = '.bodyBox';
+                this.headBoxName = '.headBox';
+                this.foodName = '.food';
+                this.setStyleObj();
+                this.initPic( this.boxName, 
+                              this.boxInnerName, 
+                              this.optionName, 
+                              this.startBtnName 
+                            );
+                this.initTcs( this.bodyBoxName, 
+                              this.headBoxName, 
+                              this.boxInnerName, 
+                              this.initLen, 
+                              this.initDoneFunc.bind( this, this[this.startBtnName] ) 
+                            );
+            }
+
+            stylesObj
+
+            setStyleObj = () => {
+                this.stylesObj = {
+                    [this.boxName]: {
+                        width: '80vw',
+                        height: '80vh',
+                        margin: '20px auto',
+                        border: '2px solid black',
+                        position: 'relative',
+                    },
+                    [this.boxInnerName]: {
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                    },
+                    [this.optionName]: {
+                        width: '80vw',
+                        margin: '0 auto'
+                    },
+                    [this.startBtnName]: {
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                        float: 'left',
+                    },
+                    [this.bodyBoxName]: {
+                        position: 'absolute',
+                        background: '#ccc',
+                    },
+                    [this.headBoxName]: {
+                        position: 'absolute',
+                        background: 'crimson',
+                    },
+                    [this.foodName]: {
+                        position: 'absolute',
+                        backgroundColor: 'rgb(7, 25, 180)',
+                    }
+                }
+            }
+            
+            //初始化
+            initPic = ( boxName, boxInnerName, optionName, startBtnName ) => {
+                const es = document.createElement('div'),
+                      esBody = document.createElement('div'),
+                      option = document.createElement('div'),
+                      startBtn = document.createElement('div'),
+                      body = document.querySelector('body');
+                Object.assign(es.style, this.stylesObj[boxName]);
+                Object.assign(esBody.style, this.stylesObj[boxInnerName]);
+                Object.assign(option.style, this.stylesObj[optionName]);
+                Object.assign(startBtn.style, this.stylesObj[startBtnName]);
+                //储存dom
+                this[boxName] = es;
+                this[boxInnerName] = esBody;
+                this[optionName] = option;
+                this[startBtnName] = body;
+
+                startBtn.innerHTML='开始游戏';
+                es.appendChild(esBody);
+                option.appendChild(startBtn);
+                body.appendChild(es);
+                body.appendChild(option);
+            }
+
+            //初始化蛇
+            initTcs = ( bodyBoxName, headBoxName, boxInnerName, initLen, cb ) => {
+                const bodys = document.querySelectorAll(bodyBoxName),
+                len = bodys.length;
+                for( var n = 0; n < len; n++){
+                    bodys[n].remove();
+                }
+                const box = this[boxInnerName],
+                      headBox = document.createElement('div');
+                headBox.classList.add(this.dealWithCssName(bodyBoxName));
+                headBox.classList.add(this.dealWithCssName(headBoxName));
+                Object.assign(headBox.style, this.stylesObj[bodyBoxName], this.stylesObj[headBoxName]);
+                headBox.style.top = 0;
+                headBox.style.width = this.bodyWidth + 'px';
+                headBox.style.height = this.bodyWidth + 'px';
+                box.appendChild(headBox);
+                if( initLen ){
+                    headBox.style.left = ( initLen - 1 ) * this.bodyWidth + 'px';
+                    for( let i = initLen - 2; i >= 0 ; i-- ){
+                        let bodyBox = this.createBody( bodyBoxName, i * this.bodyWidth, 0 );
+                        bodyBox.style.width = this.bodyWidth + 'px';
+                        bodyBox.style.height = this.bodyWidth + 'px';
+                        box.appendChild( bodyBox );
+                    }
+                }
+                cb();
+            }
+            
+            //初始化结束，上树成功 可绑定事件
+            initDoneFunc = (startBtnEl) => {
+                startBtnEl.onclick = this.startFun;
+            }
+
+            createBody = ( bodyBoxName, left, top ) => {
+                const bodyBox = document.createElement('div');
+                bodyBox.classList.add(this.dealWithCssName(bodyBoxName));
+                Object.assign(bodyBox.style, this.stylesObj[bodyBoxName]);
+                bodyBox.style.left = left+'px';
+                top || top == 0 ? bodyBox.style.top = top+'px': '';
+                return bodyBox;
+            }
+
+            startFun = () => {
+                this.listenOrRemoveKeyDown(this.onkeydownFunc)
+                this.positionRe(this.bodyBoxName);
+                this.oriented='right';
+                this.startTimeInterval();
+                this.addPzFun();
+                this.rollTimeFood();
+            }
+
+            endFun = () => {
+                console.log(123);
+                this.listenOrRemoveKeyDown();
+                clearInterval(this.intervalId);
+                clearTimeout(this.createFoodTimeoutId);
+                this.delFood();
+                this.initTcs( this.bodyBoxName, 
+                              this.headBoxName, 
+                              this.boxInnerName, 
+                              this.initLen, 
+                              this.initDoneFunc.bind( this, this[this.startBtnName] ) 
+                            );
+                this.positionRe(this.bodyBoxName);
+            }
+
+            dealWithCssName = name => {
+                return name.replace(/[\.#]/ig,'')
+            }
+
+            positionRe = ( bodyBoxName ) => {
+                var bodyBox = document.querySelectorAll( bodyBoxName ),
+                    width = bodyBox[0].offsetWidth,
+                    len = bodyBox.length;
+                for( var i = 0; i < len; i++ ){
+                    var key = len-1-i;
+                    bodyBox[key].style.left = i * width +'px';
+                    bodyBox[key].style.top = 0;
+                }
+            }
+
+            listenOrRemoveKeyDown = (func) => {
+                window.onkeydown = func;
+            }
+
+            onkeydownFunc = (e) => {
+                const { move, oriented } = this;
+                    switch (e.keyCode) {
+                        case 38:
+                            if( oriented === 'down' ){
+                                return;
+                            }
+                            this.oriented = 'top';
+                            break;
+                        case 40:
+                            if( oriented === 'top' ){
+                                return;
+                            }
+                            this.oriented = 'down';
+                            break;
+                        case 37:
+                            if( oriented === 'right' ){
+                                return;
+                            }
+                            this.oriented = 'left';
+                            break;
+                        case 39:
+                            if( oriented === 'left' ){
+                                return;
+                            }
+                            this.oriented = 'right';
+                            break;
+                        default:
+                            return;
+                    }
+                    //keyCode 38 up
+                    //keyCode 40 down
+                    //keyCode 37 left
+                    //keyCode 39 right
+                    move( this.bodyBoxName, this.headBoxName, this.boxInnerName );
+                }
+            
+            startTimeInterval = () => {
+                this.intervalId = setInterval( this.move, 200, this.bodyBoxName, this.headBoxName, this.boxInnerName );
+            }
+            
+            move = ( bodyBoxName, headBoxName, boxInnerName ) => {
+                let bodys = document.querySelectorAll(bodyBoxName),
+                    boxs = this[boxInnerName],
+                    len = bodys.length,
+                    itemWidth =  bodys[0].offsetWidth,
+                    itemHeight =  bodys[0].offsetHeight,
+                    itemLeft = bodys[0].offsetLeft,
+                    itemTop = bodys[0].offsetTop;
+                switch (this.oriented) {
+                    case 'right':
+                        //水平加
+                        bodys[len-1].style.left = itemLeft + itemWidth + 'px';
+                        bodys[len-1].style.top = itemTop + 'px';
+                        break;
+                    case 'left':
+                        //水平减
+                        bodys[len-1].style.left = itemLeft - itemWidth + 'px';
+                        bodys[len-1].style.top = itemTop + 'px';
+                        break;
+                    case 'down':
+                        //垂直加
+                        bodys[len-1].style.top = itemTop + itemHeight + 'px';
+                        bodys[len-1].style.left = itemLeft + 'px';
+                        break;
+                    case 'top':
+                        //垂直减
+                        bodys[len-1].style.top = itemTop - itemHeight + 'px';
+                        bodys[len-1].style.left = itemLeft + 'px';
+                        break;
+                }
+                bodys[0].classList.remove('headBox');
+                Object.assign( bodys[0].style, this.stylesObj[bodyBoxName] )
+                bodys[len-1].classList.add('headBox');
+                Object.assign( bodys[len-1].style, this.stylesObj[headBoxName] )
+                console.log(bodys)
+                boxs.insertBefore( bodys[len-1], bodys[0] );
+                this.pz();
+            }
+
+            addPzFun = () => {
+                this.pzObj.wall = this.wall;
+                this.pzObj.eatSelf = this.eatSelf;
+                this.pzObj.eatFood = this.eatFood;
+            }
+
+            //碰撞判断
+            pz = () => {
+                for( var key in this.pzObj ){
+                    switch (this.pzObj[key]()) {
+                        case 'end':
+                            this.endFun();
+                            //TODO
+                            //结束画面
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            //围墙碰撞
+            wall = () => {
+                var fatherBody = this[this.boxInnerName],
+                    headBox = document.querySelector(this.headBoxName),
+                left = fatherBody.offsetLeft,
+                top = fatherBody.offsetTop,
+                width = fatherBody.offsetWidth,
+                height = fatherBody.offsetHeight,
+                litLeft = headBox.offsetLeft,
+                litTop = headBox.offsetTop,
+                litWidth = headBox.offsetWidth,
+                litHeight = headBox.offsetHeight,
+                leftMin = litLeft < left,
+                leftMax = litLeft + litWidth > left + width,
+                topMin = litTop < top,
+                topMax = litTop + litHeight > top + height;
+                if( leftMin || leftMax || topMin || topMax ){
+                    //GG
+                    return 'end';
+                }
+                return true;
+            }
+
+            //自杀碰撞
+            eatSelf = () => {
+                var bodys = document.querySelectorAll(this.bodyBoxName),
+                    head = document.querySelector(this.headBoxName),
+                    len = bodys.length;
+                for( var i = 0; i < len; i++ ){
+                    if( !bodys[i].classList.contains('headBox')){
+                        if( collision( bodys[i], head ) ){
+                            return 'end';
+                        }
+                    }
+                }
+            }
+
+            //食物碰撞
+            eatFood = () => {
+                var food = document.querySelectorAll(this.foodName),
+                    head = document.querySelector(this.headBoxName),
+                    bodys = document.querySelectorAll(this.bodyBoxName),
+                    box = this[this.boxInnerName],
+                    len = food.length,
+                    bodysLen = bodys.length;
+                for( var i = 0; i < len; i++ ){
+                    if( this.collision( food[i], head ) ){
+                        var left = bodys[bodysLen-2].offsetLeft;
+                        var top = bodys[bodysLen-2].offsetTop;
+                        box.appendChild( this.createBody( this.bodyBoxName, left, top ) );
+                        food[i].remove();
+                        return;
+                    }
+                }
+            }
+            
+            //碰撞检测
+            collision = ( box1, box2 ) => {
+                var box1Left = box1.offsetLeft,
+                    box2Left = box2.offsetLeft,
+                    box1Top = box1.offsetTop,
+                    box2Top = box2.offsetTop,
+                    box1Width = box1.offsetWidth,
+                    box2Width = box2.offsetWidth,
+                    box1Height = box1.offsetHeight,
+                    box2Height = box2.offsetHeight,
+                    leftBoom = false,
+                    topBoom = false;0
+                // //水平碰撞检测
+                // if( box1Left + box1Width <= box2Left + box2Width && box1Left + box1Width >= box2Left ){
+                //     leftBoom = true
+                // }
+                // //垂直碰撞检测
+                // if( box1Top + box1Height <= box2Top + box2Height && box1Top + box1Height >= box2Top ){
+                //     topBoom = true
+                // }
+                // if( leftBoom && topBoom ){
+                //    if( ( box1Left + box1Width - box2Left ) * ( box2Top + box2Height - box1Top ) ){
+                //        return 'end'
+                //    }
+                // }
+
+                if( box1Left === box2Left && box1Top == box2Top ){
+                    return 'end'
+                }
+            }
+
+
+            rollTimeFood = () => {
+                this.createFoodTimeoutId = setTimeout(() => {
+                    var relNum = Math.ceil( Math.random()*this.foodNum );
+                    for( let i = 0; i < relNum; i++ ){
+                        this.createFood();
+                    }
+                    this.rollTimeFood()
+                }, Math.ceil( Math.random()*this.timeRandom ));
+            }
+
+            //创建食物
+            createFood = () => {
+                var food = document.createElement('div'),
+                    foodBox = document.querySelectorAll(this.foodName),
+                    box = this[this.boxInnerName]
+                food.classList.add('food');
+                Object.assign( food.style, this.stylesObj[this.foodName] )
+                var left = box.offsetLeft,
+                    top = box.offsetTop,
+                    width = box.offsetWidth,
+                    height = box.offsetHeight;
+                var leftTopObj = this.randomLeftTop( foodBox, left, top, width, height );
+                food.style.left = leftTopObj.left + 'px';
+                food.style.top = leftTopObj.top + 'px';
+                food.style.width = this.bodyWidth + 'px';
+                food.style.height = this.bodyWidth + 'px';
+                box.appendChild(food);
+            }
+
+            randomLeftTop = ( foodBox, left, top, width, height ) => {
+                var len = foodBox.length;
+                var foodLeft = left + parseInt(parseInt( width / this.bodyWidth ) * Math.random()) * this.bodyWidth;
+                var foodTop = top + parseInt(parseInt( height / this.bodyWidth ) * Math.random()) * this.bodyWidth;
+                for( var i = 0; i < len; i++ ){
+                    if( foodBox[i].offsetLeft === foodLeft && foodBox[i].offsetHeight === foodTop ){
+                        return randomLeftTop(foodBox);
+                    }
+                }
+                return {left: foodLeft, top: foodTop }
+            }
+
+            delFood = () => {
+                var food = document.querySelectorAll(this.foodName);
+                food.forEach(item=>item.remove())
+            }
+        }
+
+        new CreateTanchishe();
+    </script>
+</body>
+</html>

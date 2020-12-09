@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        /*cubic-bezier(.7,.5,.5,.7)*/
+        .anticon-spin{
+            width: 100px;
+            height: 100px;
+            animation: yuan 1s  infinite linear;
+            color: #1890ff;
+        }
+        @keyframes yuan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <canvas width=808 height=400 id="canvas"></canvas>
+    <canvas width=808 height=400 id="canvas_full"></canvas>
+    <div class="abc">
+        <svg viewBox="0 0 1024 1024" focusable="false" class="anticon-spin" data-icon="loading" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M988 548c-19.9 0-36-16.1-36-36 0-59.4-11.6-117-34.6-171.3a440.45 440.45 0 0 0-94.3-139.9 437.71 437.71 0 0 0-139.9-94.3C629 83.6 571.4 72 512 72c-19.9 0-36-16.1-36-36s16.1-36 36-36c69.1 0 136.2 13.5 199.3 40.3C772.3 66 827 103 874 150c47 47 83.9 101.8 109.7 162.7 26.7 63.1 40.2 130.2 40.2 199.3.1 19.9-16 36-35.9 36z"></path></svg>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        function getarr(len){
+            var arr = [];
+            for( let i = 0; i < len; i++ ){
+                arr.push(i)
+            }
+            return arr
+        }
+        var arr = getarr(6666666),
+            len = arr.length,
+            endNum = 6666665;
+        //for each
+        var b = +new Date();
+        arr.forEach( item => {
+            if( item === endNum ){
+                console.log( +new Date() - b, 'forEach' );
+                return;
+            }
+        } )
+        console.log( +new Date() - b, 'forEach end' );
+
+        //for + break
+        var a = +new Date();
+        for( var i = 0; i < len; i++ ){
+            if( arr[i] === endNum ){
+                console.log(+new Date - a, 'for')
+                break
+            }
+        }
+        console.log(+new Date - a, 'for end')
+
+        //for
+        var d = +new Date();
+        for( var i = 0; i < len; i++ ){
+            if( arr[i] === endNum ){
+                console.log(+new Date - d, 'forrel')
+            }
+        }
+        console.log(+new Date - d, 'forrel end')
+
+
+        //map
+        var c = +new Date();
+        arr.map( item => {
+            if( item === endNum ){
+                console.log( +new Date() - c, 'map' );
+            }
+            return item;
+        } )
+        console.log( +new Date() - c, 'map end' );
+    </script>
+    <!-- <script src="./reg.js"></script> -->
+    <!-- <script>
+    //     class ArcGradientOptions {
+    //         constructor(options) {
+    //             function validateParam(test, errorMessage, fatal = false) {
+    //                 if (!test) {
+    //                     if (fatal) {
+    //                         throw new Error(errorMessage);
+    //                     } else {
+    //                         console.assert(false, errorMessage);
+    //                     }
+    //                 }
+    //             }
+    //             options = Object.assign({
+    //                 useDegrees: false,
+    //                 resolutionFactor: 8,
+    //             }, options);
+    //             validateParam((options.resolutionFactor instanceof Number | typeof options.resolutionFactor === 'number') && options.resolutionFactor > 0, `ArcGradientOptions.resolutionFactor must be a Number greater than 0.  Given: ${options.resolutionFactor}`, true);
+    //             Object.assign(this, options);
+    //         }
+    //     };
+    //     function generateGradientImgData(width, colorStops) {
+    //         let canvas = document.createElement('canvas');
+    //         canvas.setAttribute('width', width);
+    //         canvas.setAttribute('height', 1);
+    //         let ctx = canvas.getContext('2d'),
+    //             gradient = ctx.createLinearGradient(0, 0, width, 0);
+    //         for (let i = 0; i < colorStops.length; i++) {
+    //             gradient.addColorStop(colorStops[i].offset, colorStops[i].color);
+    //         }
+    //         ctx.fillStyle = gradient;
+    //         ctx.fillRect(0, 0, width, 1);
+    //         canvas.remove();
+    //         document.querySelector('body').appendChild(canvas)
+    //         return ctx.getImageData(0, 0, width, 1);
+    //     }
+    //     CanvasRenderingContext2D.prototype.fillArcGradient = 
+    //     function (x, y, startAngle, endAngle, colorStops, outerRadius, innerRadius = 0, options) {
+    //         options = new ArcGradientOptions(options);
+    //         console.log( options, this.lineWidth, this.strokeStyle )
+    //         let oldLineWidth = this.lineWidth,
+    //             oldStrokeStyle = this.strokeStyle;
+    //         if (options.useDegrees) {
+    //             startAngle = startAngle * Math.PI / 180;
+    //             endAngle = endAngle * Math.PI / 180;
+    //         }
+    //         console.log( endAngle, startAngle )
+    //         let deltaArcAngle = endAngle - startAngle;
+    //         gradientWidth = Math.floor(outerRadius * Math.abs(deltaArcAngle) * options.resolutionFactor), 
+    //         gData = generateGradientImgData(gradientWidth, colorStops).data;
+    //         console.log( gradientWidth, gData, generateGradientImgData(gradientWidth, colorStops) )
+    //         this.lineWidth = Math.min(4 / options.resolutionFactor, 1);
+    //         for (let i = 0; i < gradientWidth; i++) {
+    //             let gradi = i * 4,
+    //                 theta = startAngle + deltaArcAngle * i / gradientWidth;
+    //             this.strokeStyle = `rgba(${gData[gradi]}, ${gData[gradi+1]}, ${gData[gradi+2]}, ${gData[gradi+3]})`;
+    //             this.beginPath();
+    //             this.moveTo(x + Math.cos(theta) * innerRadius, y + Math.sin(theta) * innerRadius);
+    //             this.lineTo(x + Math.cos(theta) * outerRadius, y + Math.sin(theta) * outerRadius);
+    //             this.stroke();
+    //             this.closePath();
+    //             console.log( Math.cos(theta) * innerRadius, Math.sin(theta) * innerRadius, 'inner' )
+    //             // console.log( x + Math.cos(theta) * outerRadius, y + Math.sin(theta) * outerRadius, 'outer' )
+    //         }
+    //         this.lineWidth = oldLineWidth;
+    //         this.strokeStyle = oldStrokeStyle;
+    //     }
+    //     create_circle()
+    //     function create_circle() {
+    //     const colors = ['#FF4F48', '#F5C245', '#68E756', '#03A35C'];
+    //     let ctx = $('#canvas_full')[0].getContext('2d');
+    //     let side = 400;
+    //     let colorStops = [];
+    //     let border = 10;
+    //     let side_2 = side / 2;
+    //     for (let i = 0; i < colors.length; i++) {
+    //         colorStops.push({
+    //             offset: i / (colors.length - 1),
+    //             color: colors[i]
+    //         });
+    //     }
+    //     console.log( colorStops );
+    //     ctx.fillArcGradient(side, side_2, 0, 360, colorStops, side_2, side_2 - border, {
+    //         useDegrees: true
+    //     });
+    //     // let ctx2 = $('#canvas')[0].getContext('2d');
+    //     // ctx2.fillArcGradient(side, side_2, 0, 360, [{
+    //     //     offset: 0,
+    //     //     color: '#242A2F'
+    //     // }], side_2 + 1, side_2 - border - 1, {
+    //     //     useDegrees: true
+    //     // });
+    // }
+
+    
+
+        // var canvasB = document.querySelector('#canvasB');
+        // var ctx2=canvasb.getContext('2d');
+
+
+        class ArcGradientOptions {
+            constructor(options) {
+                function validateParam(test, errorMessage, fatal = false) {
+                    if (!test) {
+                        if (fatal) {
+                            throw new Error(errorMessage);
+                        } else {
+                            console.assert(false, errorMessage);
+                        }
+                    }
+                }
+                options = Object.assign({
+                    useDegrees: false,
+                    resolutionFactor: 8,
+                }, options);
+                validateParam((options.resolutionFactor instanceof Number | typeof options.resolutionFactor === 'number') && options.resolutionFactor > 0, `ArcGradientOptions.resolutionFactor must be a Number greater than 0.  Given: ${options.resolutionFactor}`, true);
+                Object.assign(this, options);
+            }
+        };
+        function generateGradientImgData(width, colorStops) {
+            let canvas = document.createElement('canvas');
+            canvas.setAttribute('width', width);
+            canvas.setAttribute('height', 1);
+            let ctx = canvas.getContext('2d'),
+                gradient = ctx.createLinearGradient(0, 0, width, 0);
+            for (let i = 0; i < colorStops.length; i++) {
+                gradient.addColorStop(colorStops[i].offset, colorStops[i].color);
+            }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, 1);
+            canvas.remove();
+            return ctx.getImageData(0, 0, width, 1);
+        }
+        CanvasRenderingContext2D.prototype.fillArcGradient = 
+        function (x, y, startAngle, endAngle, colorStops, outerRadius, innerRadius = 0, options) {
+            options = new ArcGradientOptions(options);
+            let oldLineWidth = this.lineWidth,
+                oldStrokeStyle = this.strokeStyle;
+            if (options.useDegrees) {
+                startAngle = startAngle * Math.PI / 180;
+                endAngle = endAngle * Math.PI / 180;
+            }
+            let deltaArcAngle = endAngle - startAngle;
+            gradientWidth = Math.floor(outerRadius * Math.abs(deltaArcAngle) * options.resolutionFactor), 
+            gData = generateGradientImgData(gradientWidth, colorStops).data;
+            this.lineWidth = Math.min(4 / options.resolutionFactor, 1);
+            for (let i = 0; i < gradientWidth; i++) {
+                let gradi = i * 4,
+                    theta = startAngle + deltaArcAngle * i / gradientWidth;
+                this.strokeStyle = `rgba(${gData[gradi]}, ${gData[gradi+1]}, ${gData[gradi+2]}, ${gData[gradi+3]})`;
+                this.beginPath();
+                this.moveTo(x + Math.cos(theta) * innerRadius, y + Math.sin(theta) * innerRadius);
+                this.lineTo(x + Math.cos(theta) * outerRadius, y + Math.sin(theta) * outerRadius);
+                this.stroke();
+                this.closePath();
+            }
+            this.lineWidth = oldLineWidth;
+            this.strokeStyle = oldStrokeStyle;
+        }
+        //调用
+        create_circle()
+        function create_circle() {
+        //获取canvas
+        let ctx = $('#canvas_full')[0].getContext('2d');
+        //半径
+        let side = 400;
+        //圆环宽度
+        let border = 10;
+        let side_2 = side / 2;
+        ctx.fillArcGradient(side, side_2, 0, 360, [{
+            offset: 0,
+            color: '#242A2F'
+        }], side_2 + 1, side_2 - border - 1, {
+            useDegrees: true
+        });
+    }
+    </script> -->
+    <script>
+    
+    
+    </script>
+</body>
+</html>

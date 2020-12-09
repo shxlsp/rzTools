@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <a download href="http://oss-from-sh.oss-cn-hangzhou.aliyuncs.com/DBG1RW%7D[QF]KTYVB2%7DS$KPI.zip" target="_blank">下载</a>
+    <button>下载</button>
+    <script src="./jq.js"></script>
+    <script>
+        document.querySelector('button').onclick=function(){
+            window.open("https://hltest-1304137023.cos.ap-nanjing.myqcloud.com/HlVideo/20201202/80/f0f5292fdfab8b4ca31ac58d23211e8d.mp4")
+
+            // down('aa.mp4','https://hltest-1304137023.cos.ap-nanjing.myqcloud.com/HlVideo/20201202/80/f0f5292fdfab8b4ca31ac58d23211e8d.mp4')
+        };
+        function down(filePath,fileName,fileOldName) {
+            var $form = $('<form method="GET"><a id="downFile"></a></form>');
+            $form.appendTo($('body'));
+            $("#downFile").attr('href',fileName);
+            $("#downFile").attr('download',filePath);
+            $("#downFile")[0].click();
+        }
+        function download(filename, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:blob;,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+            
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            
+            element.click();
+            
+            document.body.removeChild(element);
+        }
+            
+            // download("filename.txt","https://hltest-1304137023.cos.ap-nanjing.myqcloud.com/HlVideo/20201202/80/f0f5292fdfab8b4ca31ac58d23211e8d.mp4")
+    </script>
+</body>
+</html>
